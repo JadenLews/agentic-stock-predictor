@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual envs
+agentvenv/
+.env/
+*.env
+
+# macOS system files
+.DS_Store
+
+# Project-specific
+.env          # your secret keys
+.env.*        # any variants like .env.dev
