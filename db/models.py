@@ -39,3 +39,14 @@ class EntityHit(Base):
         UniqueConstraint("article_id", "symbol", name="uq_entityhit_article_symbol"),
         Index("ix_entity_hits_symbol", "symbol")
     )
+
+
+class Fear_Greed_Index(Base):
+    __tablename__ = "fear_greed_index"
+    date = Column(DateTime, nullable=False, primary_key=True)
+    Value = Column(Integer, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("date", name="uq_date"),
+        Index("ix_date")
+    )

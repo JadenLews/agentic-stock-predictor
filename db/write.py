@@ -4,7 +4,8 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from db.session import SessionLocal
-from db.models import Article, EntityHit
+from db.models import Article, EntityHit, Fear_Greed_Index
+import pandas as pd
 
 def save_articles_to_db(items: list[dict]):
     """
@@ -77,3 +78,39 @@ def save_articles_to_db(items: list[dict]):
 
             session.commit()
         return art_new, hit_new
+    
+
+
+def save_fgi_to_db(items: list[dict]):
+    """
+    Each row like:
+    {
+      "date": "2025-08-09T16:30:37Z",
+      "value": "63 
+    }
+    """
+
+    if not items:
+        return 0 # no items added
+    
+    date_new = 0
+
+
+    with SessionLocal() as session:
+        for row in items:
+            r_date = pd.to_datetime(row.get["x"], unit="ms", utc=True).date()
+            val = int(row["y"])
+
+            day = session.get(Fear_Greed_Index, r_date)
+            if not day:
+                day = Fear_Greed_Index(
+                    date = datetime.fromisoformat(
+                        r_date.replace("Z","+00:00"),
+                    value      = val or 0,
+                    ),
+                )
+                session.add(day)
+                date_new += 1
+
+            session.commit()
+        return date_new
