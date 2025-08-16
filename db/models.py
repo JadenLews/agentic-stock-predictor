@@ -1,7 +1,7 @@
 # db/models.py
 
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import Column, String, Text, DateTime, Float, Integer, ForeignKey, UniqueConstraint, Index
+from sqlalchemy import Column, String, Text, DateTime, Float, Integer, ForeignKey, UniqueConstraint, Index, Date
 
 Base = declarative_base()
 
@@ -41,12 +41,11 @@ class EntityHit(Base):
     )
 
 
-class Fear_Greed_Index(Base):
-    __tablename__ = "fear_greed_index"
-    date = Column(DateTime, nullable=False, primary_key=True)
-    Value = Column(Integer, nullable=False)
+class FearGreedDaily(Base):
+    __tablename__ = "fear_greed_daily"
+    date  = Column(Date, primary_key=True, nullable=False)   # one row per day
+    value = Column(Integer, nullable=False)                  # 0..100
 
     __table_args__ = (
-        UniqueConstraint("date", name="uq_date"),
-        Index("ix_date")
+        Index("ix_fgi_date", "date"),
     )

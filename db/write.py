@@ -1,10 +1,10 @@
 # db/write.py
 
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from db.session import SessionLocal
-from db.models import Article, EntityHit, Fear_Greed_Index
+from db.models import Article, EntityHit, FearGreedDaily
 import pandas as pd
 
 def save_articles_to_db(items: list[dict]):
@@ -81,36 +81,27 @@ def save_articles_to_db(items: list[dict]):
     
 
 
-def save_fgi_to_db(items: list[dict]):
-    """
-    Each row like:
-    {
-      "date": "2025-08-09T16:30:37Z",
-      "value": "63 
-    }
-    """
-
+def save_fgi_to_db(items: list[dict]) -> int:
     if not items:
-        return 0 # no items added
-    
-    date_new = 0
+        return 0
 
+    # 1) Collapse to one row per date
+    by_date = {}  # {date: value}
+    for pt in items:
+        d = datetime.fromtimestamp(float(pt["x"]) / 1000.0, tz=timezone.utc).date()
+        v = int(round(float(pt["y"])))
+        by_date[d] = v  # last wins
 
-    with SessionLocal() as session:
-        for row in items:
-            r_date = pd.to_datetime(row.get["x"], unit="ms", utc=True).date()
-            val = int(row["y"])
-
-            day = session.get(Fear_Greed_Index, r_date)
-            if not day:
-                day = Fear_Greed_Index(
-                    date = datetime.fromisoformat(
-                        r_date.replace("Z","+00:00"),
-                    value      = val or 0,
-                    ),
-                )
-                session.add(day)
-                date_new += 1
-
-            session.commit()
-        return date_new
+    added = 0
+    with SessionLocal() as s:
+        for d, v in by_date.items():
+            row = s.get(FearGreedDaily, d)
+            if not row:
+                s.add(FearGreedDaily(date=d, value=v))
+                added += 1
+            else:
+                # upsert: update existing
+                row.value = v
+                s.add(row)
+        s.commit()
+    return added

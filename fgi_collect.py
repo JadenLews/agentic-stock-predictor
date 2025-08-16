@@ -12,7 +12,8 @@ from db.write import save_fgi_to_db
 
 
 BASE_URL = "https://production.dataviz.cnn.io/index/fearandgreed/graphdata/"
-START_DATE = '2024-01-01'
+#START_DATE = '2024-01-01'
+START_DATE = '2025-08-01'
 OUT_CSV = Path("all_fng.csv")
 END_DATE = '2026-01-01'
 
@@ -37,35 +38,10 @@ def fetch_fgi_since(start_date: str) -> list[dict]:
 
 def main():
 
-   rows = fetch_fgi_since(str(START_DATE))
+   resp = fetch_fgi_since(START_DATE)  # if this returns the whole JSON
+   rows = resp["fear_and_greed_historical"]["data"]
    added = save_fgi_to_db(rows)
    print(f"Added {added} new records")
-
-
-
-
-
-#    # first run: creates new df; others load and update
-#    if OUT_CSV.exists() and OUT_CSV.stat().st_size > 0:
-#       df = pd.read_csv(OUT_CSV, parse_dates=["Date"])
-#       start_next = max(df["Date"])
-#       #fetch from day latest record is stored
-#       rows = fetch_fgi_since(str(start_next))
-#       if rows:
-#          df_new = pd.DataFrame(rows)
-#          df = pd.concat([df, df_new], ignore_index=True)
-#    else:
-#       # first run: fetch from START_DATE
-#       rows = fetch_fgi_since(str(START_DATE))
-#       df = pd.DataFrame(rows)
-
-#    if not df.empty:
-#       df.drop_duplicates(subset=["Date"]).sort_values("Date")
-#       df.to_csv("all_fng.csv", index=False)
-#       print(f"Saved {len(df)} rows -> all_fng.csv")
-#    else:
-#       print("No data returned from CNN endpoint. Try a different START_DATE.")
-
 
 
 main()
