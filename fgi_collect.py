@@ -36,6 +36,8 @@ def fetch_fgi_since(start_date: str) -> list[dict]:
    return js
 
 
+
+
 def main():
 
    resp = fetch_fgi_since(START_DATE)  # if this returns the whole JSON
@@ -45,3 +47,7 @@ def main():
 
 
 main()
+
+
+
+ 
