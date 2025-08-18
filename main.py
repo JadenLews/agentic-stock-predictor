@@ -3,30 +3,42 @@ from pathlib import Path
 from db.write import save_articles_to_db
 
 from api_client import fetch_marketaux
-
-DATA_DIR = Path("data")
-RAW_DIR = DATA_DIR / "raw"
-PROC_DIR = DATA_DIR / "processed"
-RAW_DIR.mkdir(parents=True, exist_ok=True)
-PROC_DIR.mkdir(parents=True, exist_ok=True)
-
+from yfinance_collect import update_stock_values
+from fgi_collect import fetch_fgi_since
 
 if __name__ == "__main__":
+    pass
+
+
+
+
+
+
+
+
+
+def test_apis():
+
     parameters = {
         "symbols": "TSLA",
         "language": "en",
-        "limit": 10,
-        # Recommended so you actually get entity sentiment on each row:
+        "limit": 3,
         "filter_entities": "true",
         "must_have_entities": "true",
         "page": 1,
     }
 
-    for i in range(10, 15):
-        parameters["page"] = i
-        print(parameters)
-        
-        resp = fetch_marketaux(parameters)
+    # gets news sentiment, only 3 articles at a time, must go by page
+    resp = fetch_marketaux(parameters)
 
-        articles_added, hits_added = save_articles_to_db(resp.get("data", []))
-        print(f"Inserted {articles_added} new articles, {hits_added} entity hits.")
+    articles_added, hits_added = save_articles_to_db(resp.get("data", []))
+    print(f"Inserted {articles_added} new articles, {hits_added} entity hits.")
+
+
+
+    #update stock values in db
+    print(update_stock_values("TSLA", "2023-01-01"))
+
+    print(fetch_fgi_since('2024-01-01'))
+
+test_apis()

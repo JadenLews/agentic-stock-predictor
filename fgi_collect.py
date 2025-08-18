@@ -28,6 +28,19 @@ def fetch_fgi_since(start_date: str) -> list[dict]:
    rows = js["fear_and_greed_historical"]["data"]
    added = save_fgi_to_db(rows)
    return added
+
+
+
+
+
+
+
+
+
+
+
+
+
    # print(f"Added {added} new records")
 
    # return js
@@ -39,7 +52,6 @@ def fetch_fgi_since(start_date: str) -> list[dict]:
 
 #    resp = fetch_fgi_since(START_DATE)  # if this returns the whole JSON
 #    rows = resp["fear_and_greed_historical"]["data"]
-#    added = save_fgi_to_db(rows)
 #    print(f"Added {added} new records")
 
 

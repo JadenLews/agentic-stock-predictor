@@ -9,15 +9,3 @@ def fetch_marketaux(params: dict):
     r = httpx.get(BASE_URL, params=params, headers=headers, timeout=30)
     r.raise_for_status()
     return r.json()
-
-
-
-
-def fetch_reddit():
-    request = f"https://tradestie.com/api/v1/apps/reddit'"
-    r = httpx.get(request)
-    r.raise_for_status()
-    return r.json()
-
-
-print(fetch_reddit())

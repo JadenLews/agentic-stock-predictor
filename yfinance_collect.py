@@ -55,5 +55,5 @@ def update_stock_values(ticker: str, start_date: str) -> int:
     added = save_stock_values_to_db(out)
     return added
 
-# Example
-print(update_stock_values("AAPL", "2023-01-01"))
+# # Example
+# print(update_stock_values("TSLA", "2023-01-01"))
