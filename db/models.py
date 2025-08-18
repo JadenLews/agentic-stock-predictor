@@ -1,7 +1,7 @@
 # db/models.py
 
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import Column, String, Text, DateTime, Float, Integer, ForeignKey, UniqueConstraint, Index, Date
+from sqlalchemy import Column, String, Text, DateTime, Float, Integer, ForeignKey, UniqueConstraint, Index, Date, PrimaryKeyConstraint
 
 Base = declarative_base()
 
@@ -48,4 +48,25 @@ class FearGreedDaily(Base):
 
     __table_args__ = (
         Index("ix_fgi_date", "date"),
+    )
+
+class StockValueDaily(Base):
+    __tablename__ = "stock_value_daily"
+
+    ticker = Column(String, nullable=False)
+    date = Column(Date, nullable=False)
+
+    open = Column(Float, nullable=False)
+    high = Column(Float, nullable=False)
+    low = Column(Float, nullable=False)
+    close = Column(Float, nullable=False)
+    volume = Column(Integer, nullable=False)
+
+    rsi = Column(Float, nullable=True)
+    macd = Column(Float, nullable=True)
+    macd_signal= Column(Float, nullable=True)
+
+    __table_args__ = (
+        PrimaryKeyConstraint("ticker", "date", name="pk_ticker_date"),
+        Index("ix_ticker_date", "ticker", "date"),
     )
