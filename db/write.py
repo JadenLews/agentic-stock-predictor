@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from db.session import SessionLocal
-from db.models import Article, EntityHit, FearGreedDaily
+from db.models import Article, EntityHit, FearGreedDaily, StockValueDaily
 import pandas as pd
 
 def save_articles_to_db(items: list[dict]):
@@ -105,3 +105,40 @@ def save_fgi_to_db(items: list[dict]) -> int:
                 s.add(row)
         s.commit()
     return added
+
+def save_stock_values_to_db(items: pd.DataFrame) -> int:
+    def none_or_float(x): return None if pd.isna(x) else float(x)
+    new_rows = 0
+    with SessionLocal() as session:
+        for idx, row in items.iterrows():
+            date = pd.to_datetime(idx).date() if "date" not in items.columns else pd.to_datetime(row["date"]).date()
+
+            existing = session.get(StockValueDaily, {"ticker": row["ticker"], "date": date})
+            if not existing:
+                new_rows += 1
+                rec = StockValueDaily(
+                    ticker=row["ticker"],
+                    date=date,
+                    open_=float(row["open_"]),
+                    high=float(row["high"]),
+                    low=float(row["low"]),
+                    close_=float(row["close_"]),
+                    volume=int(row["volume"]),
+                    rsi=none_or_float(row.get("rsi")),
+                    macd=none_or_float(row.get("macd")),
+                    macd_signal=none_or_float(row.get("macd_signal")),
+                )
+                session.add(rec)
+            else:
+                # update fields if you want to refresh indicators
+                existing.open_ = float(row["open_"])
+                existing.high = float(row["high"])
+                existing.low = float(row["low"])
+                existing.close_ = float(row["close_"])
+                existing.volume = int(row["volume"])
+                existing.rsi = none_or_float(row.get("rsi"))
+                existing.macd = none_or_float(row.get("macd"))
+                existing.macd_signal = none_or_float(row.get("macd_signal"))
+                session.add(existing)
+        session.commit()   # <-- you were missing parentheses
+    return new_rows

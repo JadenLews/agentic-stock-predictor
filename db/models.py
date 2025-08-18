@@ -56,10 +56,10 @@ class StockValueDaily(Base):
     ticker = Column(String, nullable=False)
     date = Column(Date, nullable=False)
 
-    open = Column(Float, nullable=False)
+    open_  = Column("open",  Float, nullable=False)
     high = Column(Float, nullable=False)
     low = Column(Float, nullable=False)
-    close = Column(Float, nullable=False)
+    close_ = Column("close", Float, nullable=False)
     volume = Column(Integer, nullable=False)
 
     rsi = Column(Float, nullable=True)
