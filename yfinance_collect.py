@@ -3,6 +3,15 @@ import yfinance as yf
 import ta
 from db.write import save_stock_values_to_db
 
+from db.session import SessionLocal
+from db.models import StockValueDaily
+import pandas as pd
+
+from sqlalchemy import desc
+
+from datetime import timedelta
+from sqlalchemy import select
+
 def get_close_series(df: pd.DataFrame, ticker: str | None = None) -> pd.Series:
     # Handles both single- and multi-ticker outputs
     if isinstance(df.columns, pd.MultiIndex):
@@ -13,7 +22,16 @@ def get_close_series(df: pd.DataFrame, ticker: str | None = None) -> pd.Series:
         s = df["Close"]
     return s.squeeze().astype(float)
 
-def update_stock_values(ticker: str, start_date: str) -> int:
+def update_stock_values(ticker: str) -> int:
+    start_date = get_latest_day(ticker) or "2023-01-01"
+
+
+    from datetime import date as _date
+    today_str = _date.today().strftime("%Y-%m-%d")
+    if start_date > today_str:
+        start_date = today_str
+
+
     # 1) Download prices
     df = yf.download(ticker, start=start_date)
 
@@ -55,5 +73,20 @@ def update_stock_values(ticker: str, start_date: str) -> int:
     added = save_stock_values_to_db(out)
     return added
 
+
+def get_latest_day(ticker: str) -> str | None:
+    """Return YYYY-MM-DD of the day AFTER the latest stored row for ticker."""
+    with SessionLocal() as s:
+        last_date = s.execute(
+            select(StockValueDaily.date)
+            .where(StockValueDaily.ticker == ticker)
+            .order_by(StockValueDaily.date.desc())
+            .limit(1)
+        ).scalar_one_or_none()
+    if last_date:
+        return (last_date + timedelta(days=1)).strftime("%Y-%m-%d")
+    return None
+
+
 # # Example
-# print(update_stock_values("TSLA", "2023-01-01"))
+#print(update_stock_values("TSLA"))
